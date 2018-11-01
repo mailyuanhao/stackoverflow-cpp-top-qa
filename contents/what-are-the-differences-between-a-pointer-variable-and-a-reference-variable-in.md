@@ -39,4 +39,8 @@ int &ri = i;
 
 关于引用和指针的使用场景这只是一家之言。不同的编码规范有各自不同的理解和要求，就像代码风格没有高下之分，适合自己使用场景的就是最好的。
 
+其实还有其他一些区别，目前想到的比如：
+
+- 把临时对象绑定到一个引用上可以延长临时对象的生命周期， 但是直接获取临时对象的地址是很危险的 （编译器一般会警告或报错）。
+
 [原题链接](https://stackoverflow.com/questions/57483/what-are-the-differences-between-a-pointer-variable-and-a-reference-variable-in?page=1&tab=votes#tab-top)
