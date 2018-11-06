@@ -177,11 +177,11 @@ class X {
 
 ##### 二元算术操作符
 
+二元算术操作符同样要遵循第三条经验法则，如果提供 +， 同时提供 +=,如果提供了 -, 同样要提供 -= 等等。 据说 Andrew Koenig 是第一个注意到可以基于复合赋值操作符来实现对应的普通版本。比如 可以基于 += 来实现 +， 基于 -= 来实现 -。 
 
-For the binary arithmetic operators, do not forget to obey the third basic rule operator overloading: If you provide +, also provide +=, if you provide -, do not omit -=, etc. Andrew Koenig is said to have been the first to observe that the compound assignment operators can be used as a base for their non-compound counterparts. That is, operator + is implemented in terms of +=, - is implemented in terms of -= etc.
+基于我们的经验规则， + 和其他 （companions） 二元操作符要实现为非成员函数， 而赋值复合版本，因为要修改左操作数，所以应该实现为成员函数。下面是 + 和 += 的实现示例，别的应该和下面的示例类似实现。
 
-According to our rules of thumb, + and its companions should be non-members, while their compound assignment counterparts (+= etc.), changing their left argument, should be a member. Here is the exemplary code for += and +, the other binary arithmetic operators should be implemented in the same way:
-
+```C++
 class X {
   X& operator+=(const X& rhs)
   {
@@ -194,35 +194,219 @@ inline X operator+(X lhs, const X& rhs)
   lhs += rhs;
   return lhs;
 }
-operator+= returns its result per reference, while operator+ returns a copy of its result. Of course, returning a reference is usually more efficient than returning a copy, but in the case of operator+, there is no way around the copying. When you write a + b, you expect the result to be a new value, which is why operator+ has to return a new value.3 Also note that operator+ takes its left operand by copy rather than by const reference. The reason for this is the same as the reason giving for operator= taking its argument per copy.
+```
 
-The bit manipulation operators ~ & | ^ << >> should be implemented in the same way as the arithmetic operators. However, (except for overloading << and >> for output and input) there are very few reasonable use cases for overloading these.
++= 操作符返回引用，而 + 返回结果的拷贝。返回引用肯定效率更高，但是 + 操作 需要返回一个新的值，所以只能返回拷贝（所以为了效率应该优先考虑 += 而不是 + ）。注意 + 操作符的左操作数是传值而不是传引用，这和 operator = 的是一个原因。
 
-3 Again, the lesson to be taken from this is that a += b is, in general, more efficient than a + b and should be preferred if possible.
+位操作操作运算符  ~ & | ^ << >> 应该参考算术运算符的实现方法。（除非 重载为 输出，输入操作符的 << 和 >>），这几个运算符极少需要重载。
 
-Array Subscripting
-The array subscript operator is a binary operator which must be implemented as a class member. It is used for container-like types that allow access to their data elements by a key. The canonical form of providing these is this:
+#### 数组下标操作符
 
+数组下标操作符是必须被实现为成员的二元操作符。它主要用于可以通过键值（key）来访问数据成员的 容器 类型。标准实现方法如下
+
+```C++
 class X {
         value_type& operator[](index_type idx);
   const value_type& operator[](index_type idx) const;
   // ...
 };
-Unless you do not want users of your class to be able to change data elements returned by operator[] (in which case you can omit the non-const variant), you should always provide both variants of the operator.
+```
 
-If value_type is known to refer to a built-in type, the const variant of the operator should return a copy instead of a const reference.
+两个版本的 operator[] 应该同时提供，如果你不想让用户修改 operator[] 的返回值，可以删掉 non-const 版本。
 
-Operators for Pointer-like Types
-For defining your own iterators or smart pointers, you have to overload the unary prefix dereference operator * and the binary infix pointer member access operator ->:
+如果 value_type 确定是内置类型的引用， const 版本应该改为返回值的拷贝而非引用。
 
+#### 类指针类型使用的运算符(Operators for Pointer-like Types)
+
+如果要编写 迭代器 或者 智能指针， 你需要重载 解引用操作符 * 和 成员访问操作符 ->
+
+```C++
 class my_ptr {
         value_type& operator*();
   const value_type& operator*() const;
         value_type* operator->();
   const value_type* operator->() const;
 };
-Note that these, too, will almost always need both a const and a non-const version. For the -> operator, if value_type is of class (or struct or union) type, another operator->() is called recursively, until an operator->() returns a value of non-class type.
+```
 
-The unary address-of operator should never be overloaded.
+这两个操作符大多情况下需要同时提供 const 和 non-const 版本。
 
-For operator->*() see this question. It's rarely used and thus rarely ever overloaded. In fact, even iterators do not overload it.
+-> 有一个特殊的 "drill-down behavior" 行为
+
+```C++
+struct client
+    { int a; };
+
+struct proxy {
+    client *target;
+    client *operator->() const
+        { return target; }
+};
+
+struct proxy2 {
+    proxy *target;
+    proxy &operator->() const
+        { return * target; }
+};
+
+void f() {
+    client x = { 3 };
+    proxy y = { & x };
+    proxy2 z = { & y };
+
+    std::cout << x.a << y->a << z->a; // print "333"
+}
+```
+
+一元取地址操作符务必不要重载。
+
+关于 -> 和->* 可以参考[这个问题](https://stackoverflow.com/questions/8777845/overloading-member-access-operators-c)
+
+#### 类型转换操作符 （也被称为用户自定义转换）
+
+C++ 允许你创建允许编译器进行类型转换的操作符。这种类型转换操作符分为 隐式 （implicit） 和 显示 （explicit） 两种。
+
+##### 隐式类型转换操作符 （C++98/C++03 and C++11）
+
+隐式类型转换允许编译器自动（implicitly）把用户自定义类型转为另一种类型（类似 int 转换为 long）。
+
+下面示例一个实现隐式转换的简单的类
+
+```C++
+class my_string {
+public:
+  operator const char*() const {return data_;} // This is the conversion operator
+private:
+  const char* data_;
+};
+```
+隐私类型转换类似单参数构造函数属于用户自定义转换。编译器在尝试匹配重载函数时会自动采用该转换。
+
+```C++
+void f(const char*);
+
+my_string str;
+f(str); // same as f( str.operator const char*() )
+```
+
+这个看起来很有用，但是隐式转换会在预期不到的时候默默执行。下面的示例代码 中 void f(const char*) 将会被调用，因为 my_string() 不是一个左值，所以第一个 f 函数无法匹配 
+
+```C++
+void f(my_string&);
+void f(const char*);
+
+f(my_string());
+```
+
+C++ 新手甚至于有经验的 C++ 程序员有时也会困惑于编译器选择了非预期的重载函数。显示类型转换可以缓解这个问题。
+
+##### 显示类型转换（C++11）
+
+与隐式类型转换不同，显示转换只有在你明确要求是才会进行。下面是一个简单的例子
+
+```C++
+class my_string {
+public:
+  explicit operator const char*() const {return data_;}
+private:
+  const char* data_;
+};
+```
+采用显示版本后，再尝试运行上述的测试代码，会报编译错误
+
+>prog.cpp: In function ‘int main()’:  
+prog.cpp:15:18: error: no matching function for call to ‘f(my_string)’  
+prog.cpp:15:18: note: candidates are:  
+prog.cpp:11:10: note: void f(my_string&)
+prog.cpp:11:10: note:   no known conversion for   argument 1 from ‘my_string’ to ‘my_string&’  
+prog.cpp:12:10: note: void f(const char*)  
+prog.cpp:12:10: note:   no known conversion for argument 1 from ‘my_string’ to ‘const char*’
+
+要执行显示类型转换，你必须使用 static_cast， C 风格转换符，或者 constructor style cast ( i.e. T(value) )。
+
+下面两段是关于显示转换的另一个优势，感觉只翻译这两段话很难说明白，直接把原文附在下面，可以详细参考 [Safe Bool idiom](https://www.artima.com/cppsource/safebool.html)来理解下面这两段话的意思。
+
+>However, there is one exception to this: The compiler is allowed to implicitly convert to bool. In addition, the compiler is not allowed to do another implicit conversion after it converts to bool (a compiler is allowed to do 2 implicit conversions at a time, but only 1 user-defined conversion at max).
+
+>Because the compiler will not cast "past" bool, explicit conversion operators now remove the need for the Safe Bool idiom. For example, smart pointers before C++11 used the Safe Bool idiom to prevent conversions to integral types. In C++11, the smart pointers use an explicit operator instead because the compiler is not allowed to implicitly convert to an integral type after it explicitly converted a type to bool.
+
+### 重载 new 和 delete
+
+>注意本文只关注重载 new 和 delete 的语法而非实现。相关的内容应该在另一个 [FAQ](https://stackoverflow.com/questions/7149461/) 中。
+
+#### 基本用法
+
+C++中， 当类似 new T(arg) 的表达式被执行时，实际上要做两件事情。首先调用 operator new 来分配原始内存空间，然后调用适当的 T 的构造函数来把这块内存构造为有效的对象。类似的，当调用 delete 删除一个对象时，先调用析构函数，然后调用 operator delete 释放内存。
+
+C++ 允许你调整 内存管理 和 对象的 构造，析构 这两个操作。调整构造，析构通过给类编写构造析构函数实现。优化内存管理可以通过自定义 operator new 和 operator delete 来实现。
+
+操作符重载的第一原则（不要重载）尤其适用于 new 和 delete。重载这两个操作符唯一的理由是性能问题和内存受限问题或者修改内存管理算法能带来更大的收益。
+
+```C++
+void* operator new(std::size_t) throw(std::bad_alloc); 
+void  operator delete(void*) throw(); 
+void* operator new[](std::size_t) throw(std::bad_alloc); 
+void  operator delete[](void*) throw(); 
+```
+
+前两个用于给单个对象分配释放内存，后两个供对象数组使用。如果你提供了自己的版本，他们不会重载而是替换标准库中的版本。
+
+如果你重载了 operator new，同时一定要提供对应的 operator delete， 即使你不打算调用它。因为如果在使用 new 表达式时 构造函数抛出了异常，运行库会自动调用对应的 operator delete 来释放已经分配的内存，如果你不提供的话，默认的版本会被调用，
+
+如果重载了 new 和 delete， 对应的数组版本也要重载。
+
+#### Placement new
+
+placement new，delete 是带有额外参数的 new， delete。通过调用他们可以实现在你指定的内存地址上构造对象。
+
+```C++
+class X { /* ... */ };
+char buffer[ sizeof(X) ];
+void f()
+{
+  X* p = new(buffer) X(/*...*/);
+  // ...
+  p->~X(); // call destructor
+} 
+```
+
+C++标准库同样附带重载版本的 Placement new 和 delete
+
+```C++
+void* operator new(std::size_t,void* p) throw(std::bad_alloc); 
+void  operator delete(void* p,void*) throw(); 
+void* operator new[](std::size_t,void* p) throw(std::bad_alloc); 
+void  operator delete[](void* p,void*) throw(); 
+```
+
+注意：上面给出的 placement new 例子里面， operator delete 仅在 X 的构造函数抛异常时才会被调用。
+
+你也可以使用别的参数重载 new 和 delete。像 placement new 的附加参数一样，这些参数也被列在 new 关键字后面的括号里面。因为历史原因这种 版本 也被称为 placement new。虽然他们的参数并不是为了在特定的地址构造对象。
+
+#### 特定类的 new 和 delete
+
+进行内存管理优化的一般原因是 测试结果 显示某一特定 class 或者某一组 classes 的对象进行频繁的创建的销毁，而为了通用目的优化的运行库中的内存管理算法在这种特定情况下效率较低。为了改善效率，你可以给特定的 类 重载 new 和 delete。
+
+```C++
+class my_class {
+  public:
+    // ...
+    void* operator new();
+    void  operator delete(void*,std::size_t);
+    void* operator new[](size_t);
+    void  operator delete[](void*,std::size_t);
+    // ...
+};
+```
+
+这些重载的 new 和 delete 类似于静态成员函数。对 my_class 的对象来说， std::size_t 参数始终是 sizeof(my_class)。当然这些操作符也会被用来动态创建继承的类的对象，此时 std::size_t 参数就可能比 sizeof(my_class)要大。
+
+#### 全局 new 和 delete
+
+为了重载全局 new 和 delete， 可以直接替换标准库提供的预定义的操作符。但是，这种情况极少遇到。
+
+## 注意
+
+关于 new 和 delete 重载 More Effective C++ 中有细致的讲解。
+
+[原题链接](https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading/4421791#4421791)
