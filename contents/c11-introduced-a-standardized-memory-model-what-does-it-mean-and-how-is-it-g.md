@@ -76,4 +76,4 @@ y.store(37,memory_order_release);   cout << x.load(memory_order_acquire) << endl
 
 基本来说 mutex 这类工具是伟大的发明， C++11 对他们进行了标准化。有时出于性能的考虑你会使用一些底层原语 （例如 [DCL 模式](http://www.justsoftwaresolutions.co.uk/threading/multithreading-in-c++0x-part-6-double-checked-locking.html)）。新标准不仅提供了像 mutexes， condition variables 这些高级工具，也提供了 atomic 和 各种 内存 栅栏这些低层的工具。所以你依据标准就可以写出复杂,高效的并发程序。而且你可以确保你的代码不仅可以在现在的系统上进行编译运行，同样也可以在未来的机器上编译运行。
 
->不过坦率的说，除非你是这方面的专家并且编写的有特别强烈的需求，我建议你坚持使用 mutexes and condition variables.
+>不过坦率的说，除非你是这方面的专家并且编写的代码有特别强烈的需求，我建议你坚持使用 mutexes and condition variables.
