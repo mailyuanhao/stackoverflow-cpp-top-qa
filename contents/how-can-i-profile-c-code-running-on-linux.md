@@ -47,4 +47,5 @@ cc -o myprog myprog.c utils.c -g -pg
 
 #### perf_events
 
-新的内核中会自带了新的性能工具 比[perf-tool](https://en.wikipedia.org/wiki/Perf_(Linux))
+新的内核中会自带了新的性能工具 比[perf-tool](https://en.wikipedia.org/wiki/Perf_(Linux))。
+
