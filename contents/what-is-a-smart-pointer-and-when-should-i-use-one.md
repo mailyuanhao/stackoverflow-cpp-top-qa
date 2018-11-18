@@ -45,9 +45,9 @@ void f()
 }
 ```
 
-注意 scoped_ptr 的对象是禁止拷贝的，这可以防止出现多次（错误的）释放同一个对象。如果需要，可以通过传递引用的方式他们传入被调用的函数中。
+注意 scoped_ptr 的对象是禁止拷贝的，这可以防止多次（错误的）释放同一个对象。如果需要，可以通过传递引用的方式把他们传入被调用的函数中。
 
-基于范围的智能指针在你需要把对象的生命周期绑定到一个代码块上或者另一个对象时（把对象嵌入到另一个对象中）很有用。对象在代码块执行完之前或绑定的对象被销毁之前会一直存在。
+基于作用域的智能指针在你需要把对象的生命周期绑定到一个代码块上或者另一个对象时（把对象嵌入到另一个对象中）很有用。对象在代码块执行完之前或绑定的对象被销毁之前会一直存在。
 
 更复杂的智能指针采取引用计数的策略。实现这种策略的智能指针能够被复制，当对象的最后一个引用被销毁时才去执行对象的删除。[boost::shared_ptr](http://www.boost.org/doc/libs/release/libs/smart_ptr/shared_ptr.htm) 和 [std::shared_ptr](http://en.cppreference.com/w/cpp/memory/shared_ptr) 实现了这个策略。
 
@@ -102,7 +102,7 @@ To work around this problem, both Boost and C++11 have defined a weak_ptr to def
 
 这个回答已经过时了， 从 C++11 开始 标准库提供了一整套的智能指针，所以你应该使用 [std::unique_ptr](http://en.cppreference.com/w/cpp/memory/unique_ptr), [std::shared_ptr](http://en.cppreference.com/w/cpp/memory/shared_ptr) 和 [std::weak_ptr](http://en.cppreference.com/w/cpp/memory/weak_ptr).
 
-std::auto_ptr 它类似于基于范围的智能指针，但是有很多问题。**在新标准中该指针已经被废弃了，在任何时候不要再使用它**！
+std::auto_ptr 它类似于基于作用域的智能指针，但是有很多问题。**在新标准中该指针已经被废弃了，在任何时候不要再使用它**！
 
 ```C++
 std::auto_ptr<MyObject> p1 (new MyObject());
