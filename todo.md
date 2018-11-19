@@ -6,3 +6,5 @@
 - [ ] https://stackoverflow.com/questions/388242/the-definitive-c-book-guide-and-list
   
 - [ ] [图片处理相关的，和C C++ 关联不大 暂时不翻译](https://stackoverflow.com/questions/10168686/image-processing-algorithm-improvement-for-coca-cola-can-recognition)
+
+- [ ] [why-does-changing-0-1f-to-0-slow-down-performance-by-10x](https://stackoverflow.com/questions/9314534/why-does-changing-0-1f-to-0-slow-down-performance-by-10x),关于非规范浮点数的问题，超出我的知识范围，而且感觉和 C++ 本身关系不大。可以参考下面的[文章](https://cenalulu.github.io/linux/about-denormalized-float-number/)
