@@ -8,19 +8,16 @@ C++ 程序的编译过程分为多个步骤， [(credits to Keith Thompson for t
 
 步骤过于专业，有些术语不知道怎么翻译。就不翻译了。直接搬过来原文。其实这个错误发生在链接阶段，只要知道编译过程大致分成 预处理，编译和链接三个步骤就能理解这篇答案了。
 
->The precedence among the syntax rules of translation is specified by the following phases [see footnote].
-
-Physical source file characters are mapped, in an implementation-defined manner, to the basic source character set (introducing new-line characters for end-of-line indicators) if necessary. [SNIP]
-Each instance of a backslash character (\) immediately followed by a new-line character is deleted, splicing physical source lines to form logical source lines. [SNIP]
-The source file is decomposed into preprocessing tokens (2.5) and sequences of white-space characters (including comments). [SNIP]
-Preprocessing directives are executed, macro invocations are expanded, and _Pragma unary operator expressions are executed. [SNIP]
-Each source character set member in a character literal or a string literal, as well as each escape sequence and universal-character-name in a character literal or a non-raw string literal, is converted to the corresponding member of the execution character set; [SNIP]
-Adjacent string literal tokens are concatenated.
-White-space characters separating tokens are no longer significant. Each preprocessing token is converted into a token. (2.7). The resulting tokens are syntactically and semantically analyzed and translated as a translation unit. [SNIP]
-Translated translation units and instantiation units are combined as follows: [SNIP]
-All external entity references are resolved. Library components are linked to satisfy external references to entities not defined in the current translation. All such translator output is collected into a program image which contains information needed for execution in its execution environment. (emphasis mine)
-[footnote] Implementations must behave as if these separate phases occur, although in practice different phases might be folded together.
-
+>The precedence among the syntax rules of translation is specified by the following phases [see footnote].   
+Physical source file characters are mapped, in an implementation-defined manner, to the basic source character set (introducing new-line characters for end-of-line indicators) if necessary. [SNIP]  
+Each instance of a backslash character (\) immediately followed by a new-line character is deleted, splicing physical source lines to form logical source lines. [SNIP]  
+The source file is decomposed into preprocessing tokens (2.5) and sequences of white-space characters (including comments). [SNIP]  
+Preprocessing directives are executed, macro invocations are expanded, and _Pragma unary operator expressions are executed. [SNIP]  
+Each source character set member in a character literal or a string literal, as well as each escape sequence and universal-character-name in a character literal or a non-raw string literal, is converted to the corresponding member of the execution character set; [SNIP]  
+Adjacent string literal tokens are concatenated.   White-space characters separating tokens are no longer significant. Each preprocessing token is converted into a token. (2.7). The resulting tokens are syntactically and semantically analyzed and translated as a translation unit. [SNIP]  
+Translated translation units and instantiation units are combined as follows: [SNIP]  
+All external entity references are resolved. Library components are linked to satisfy external references to entities not defined in the current translation. All such translator output is collected into a program image which contains information needed for execution in its execution environment. (emphasis mine)  
+[footnote] Implementations must behave as if these separate phases occur, although in practice different phases might be folded together. 
 
 问题中的错误发生在编译的最后一个阶段，也就是通常说的链接阶段。链接基本上来说就是，你已经把一堆实现文件编译成目标文件或者静态库了，现在想把他们组合在一起工作。
 
