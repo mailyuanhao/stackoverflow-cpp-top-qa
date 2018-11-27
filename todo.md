@@ -8,4 +8,5 @@
 
 # 未完成的文章
 - [ ] https://stackoverflow.com/questions/388242/the-definitive-c-book-guide-and-list
-  
+- [ ] https://stackoverflow.com/questions/610245/where-and-why-do-i-have-to-put-the-template-and-typename-keywords
+- [ ] https://stackoverflow.com/questions/4176328/undefined-behavior-and-sequence-points
