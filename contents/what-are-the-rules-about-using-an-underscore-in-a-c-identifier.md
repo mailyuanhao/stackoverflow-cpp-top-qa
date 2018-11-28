@@ -4,18 +4,18 @@
 
 规定（C++11 并没有变更）
 
-- 任何范围内均保留使用，包括 [C++ 实现](https://stackoverflow.com/questions/4297933/c-implementation#4297974)的宏：
+- 任何范围内均保留
     - 以下划线开头后面紧跟着一个大写字母的标识符
-    - 包含 相邻 下划线的标识符（或者 “double underscore”（是指仅仅由两个下划线命名的标识符么？））
+    - 包含 相邻 下划线的标识符（或者 “double underscore”（__））
 - 在全局命名空间保留
     - 以下划线开头的标识符
-- 同样所有 std 命名空间的标识符是保留的（你可以添加模板的特例化实现）
+- 所有 std 命名空间内的标识符名称是保留的（你可以添加模板的特例化实现）
 
 引用至 C++03 标准：
 >17.4.3.1.2 Global names [lib.global.names]  
 Certain sets of names and function signatures are always reserved to the implementation:  
 Each name that contains a double underscore (__) or begins with an underscore followed by an uppercase letter (2.11) is reserved to the implementation for any use.  
-Each name that begins with an underscore is reserved to the implementation for use as a name in the global namespace.    
+Each name that begins with an underscore is reserved to the implementation for use as a name in the global namespace.  
 Such names are also reserved in namespace ::std (17.4.3.1).
 
 因为 C++ 标准是基于 C 标准的，下面是 C99的相关内容引用
