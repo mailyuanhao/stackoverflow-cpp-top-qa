@@ -83,4 +83,3 @@ number ^= (-newbit ^ number) & (1UL << n);
 x 的一补码 就是 [反码](https://zh.wikipedia.org/zh-cn/%E4%B8%80%E8%A3%9C%E6%95%B8)。
 
 x 的二补码就是我们常说的[补码](https://zh.wikipedia.org/wiki/%E4%BA%8C%E8%A3%9C%E6%95%B8)。
-
